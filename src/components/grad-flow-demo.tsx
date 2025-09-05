@@ -499,12 +499,12 @@ export default function GradientBackground({
             </div>
           </div>
         </div>
-        <div className='gap-4 flex flex-col items-center px-4 max-w-4xl'>
-          <div className='space-y- text-white text-center'>
-            <h1 className='bg-gradient-to-tr from-white via-white to-transparent bg-clip-text text-transparent text-5xl md:text-7xl font-bold leading-tight tracking-tight text-balance'>
+        <div className='gap-4 flex flex-col items-center max-w-4xl'>
+          <div className='space-y-2 text-white text-center'>
+            <h1 className='bg-gradient-to-tr from-white via-white to-transparent bg-clip-text text-transparent text-4xl md:text-7xl font-bold leading-tight text-balance'>
               Create Amazing Gradients Using WebGL
             </h1>
-            <p className='text-lg md:text-xl leading-relaxed text-balance'>
+            <p className='md:text-xl leading-relaxed text-balance'>
               High-performance WebGL gradient backgrounds, film grain effects,
               and realtime customization for modern web applications.
             </p>
