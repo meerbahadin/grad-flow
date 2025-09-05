@@ -137,7 +137,7 @@ const captureImage = (
         }
 
         const link = document.createElement('a')
-        link.download = `gradeflow-gradient-${Date.now()}.webp`
+        link.download = `gradflow-gradient-${Date.now()}.webp`
         link.href = dataUrl
         document.body.appendChild(link)
         link.click()

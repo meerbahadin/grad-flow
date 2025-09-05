@@ -1,9 +1,9 @@
-import GradeFlowDemo from '../components/grade-flow-demo'
+import GradFlowDemo from '@/components/grad-flow-demo'
 
 export default function Home() {
   return (
     <main>
-      <GradeFlowDemo />
+      <GradFlowDemo />
     </main>
   )
 }
