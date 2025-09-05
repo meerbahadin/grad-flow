@@ -531,13 +531,18 @@ export default function GradientBackground({
           </Link>
 
           <div className='flex gap-2'>
-            <Button
-              size='icon'
-              onClick={() => console.log('first')}
-              className='cursor-pointer'
+            <Link
+              target='_blank'
+              href='https://github.com/meerbahadin/grad-flow'
             >
-              <IconBrandGithub />
-            </Button>
+              <Button
+                size='icon'
+                onClick={() => console.log('first')}
+                className='cursor-pointer'
+              >
+                <IconBrandGithub />
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
