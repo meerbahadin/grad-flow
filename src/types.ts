@@ -16,7 +16,7 @@ export type GradientConfig = {
 
 export type GradientType = 'linear' | 'radial' | 'diagonal' | 'animated'
 
-export type GradientBackgroundProps = {
+export type GradFlowProps = {
   config?: Partial<GradientConfig>
   className?: string
 }
