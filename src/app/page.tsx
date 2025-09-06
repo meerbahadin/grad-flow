@@ -25,13 +25,13 @@ export default function Home() {
             </p>
           </div>
 
-          <div className='space-y-3'>
-            <h3 className='text-lg font-medium'>Install Dependencies</h3>
+          <div className='space-y-2'>
+            <h3 className='text-lg'>Install Dependencies</h3>
             <CodeBlock code={`npm install ogl clsx tailwind-merge`} />
           </div>
 
-          <div className='space-y-3'>
-            <h3 className='text-lg font-medium'>Component</h3>
+          <div className='space-y-2'>
+            <h3 className='text-lg'>Component</h3>
             <CodeBlock filePath='src/components/grad-flow.tsx' />
           </div>
         </div>
