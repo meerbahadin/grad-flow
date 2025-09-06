@@ -14,7 +14,7 @@ export default function Home() {
 
       <section
         id='installation'
-        className='container max-w-3xl py-12 space-y-8'
+        className='container max-w-3xl pt-12 pb-6 space-y-8'
       >
         <div className='space-y-4'>
           <div className='space-y-2'>

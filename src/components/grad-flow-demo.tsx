@@ -3,8 +3,6 @@
 import { useEffect, useRef, useCallback, useMemo, useState } from 'react'
 import { Mesh, Program, Renderer, Transform, Plane } from 'ogl'
 
-import logo from './logo.png'
-
 import {
   Select,
   SelectContent,
@@ -26,6 +24,7 @@ import {
   IconDownload,
   IconScreenshot,
   IconSettings,
+  IconWand,
 } from '@tabler/icons-react'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -420,15 +419,8 @@ export default function GradFlowDemo({
     <div className='w-full h-dvh'>
       <div className='h-full w-full flex flex-col items-center justify-between relative py-2 container'>
         <div className='flex w-full max-w-md z-50'>
-          <div className='flex justify-between items-center w-full p-3 bg-background outline-1 outline-offset-2 outline-white/15 rounded-lg backdrop-blur-lg'>
-            <Image
-              src={logo}
-              height={25}
-              width={25}
-              alt='logo'
-              className='object-contain rounded-lg'
-            />
-
+          <div className='flex justify-between items-center w-full p-3 bg-gradient-to-tr from-background to-transparent outline-1 outline-offset-2 outline-white/15 rounded-lg backdrop-blur-lg'>
+            <IconWand />
             <div className='relative'>
               <Button
                 className='capitalize cursor-pointer'
