@@ -416,7 +416,7 @@ export default function GradFlowDemo({
   }, [])
 
   return (
-    <div className='w-full h-dvh'>
+    <div className='w-full h-screen'>
       <div className='h-full w-full flex flex-col items-center justify-between relative py-2 container'>
         <div className='flex w-full max-w-md z-50'>
           <div className='flex justify-between items-center w-full p-3 bg-gradient-to-tr from-background to-transparent outline-1 outline-offset-2 outline-white/15 rounded-lg backdrop-blur-lg'>
