@@ -626,7 +626,12 @@ export default function GradFlowDemo({
 
       <canvas
         ref={canvasRef}
-        className={cn('w-full h-full absolute top-0 -z-10', className)}
+        className={cn('w-full h-full block absolute -z-10 top-0', className)}
+        style={{
+          touchAction: 'none',
+          userSelect: 'none',
+        }}
+        aria-label='Animated gradient background'
       />
     </div>
   )
