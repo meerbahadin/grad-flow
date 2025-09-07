@@ -5,13 +5,13 @@ import { Mesh, Program, Renderer, Transform, Plane } from 'ogl'
 
 import { cn } from '@/lib/utils'
 
-type RGB = {
+export type RGB = {
   r: number
   g: number
   b: number
 }
 
-type GradientConfig = {
+export type GradientConfig = {
   color1: RGB
   color2: RGB
   color3: RGB
@@ -21,101 +21,145 @@ type GradientConfig = {
   noise: number
 }
 
-type GradientType = 'linear' | 'radial' | 'diagonal' | 'animated'
+export type GradientType =
+  | 'linear'
+  | 'radial'
+  | 'diagonal'
+  | 'animated'
+  | 'conic'
 
-type GradFlowProps = {
+export type GradFlowProps = {
   config?: Partial<GradientConfig>
   className?: string
 }
 
-const vertexShader = `
-attribute vec2 position;
-varying vec2 vUv;
-void main() {
-  vUv = position * 0.5 + 0.5;
-  gl_Position = vec4(position, 0.0, 1.0);
-}
+export const vertexShader = `
+  attribute vec2 position;
+  varying vec2 vUv;
+  
+  void main() {
+    vUv = position * 0.5 + 0.5;
+    gl_Position = vec4(position, 0.0, 1.0);
+  }
 `
 
-const fragmentShader = `
-#ifdef GL_FRAGMENT_PRECISION_HIGH
-  precision highp float;
-#else
-  precision mediump float;
-#endif
+export const fragmentShader = `
+  #ifdef GL_FRAGMENT_PRECISION_HIGH
+    precision highp float;
+  #else
+    precision mediump float;
+  #endif
 
-uniform float u_time;
-uniform vec3 u_color1;
-uniform vec3 u_color2;  
-uniform vec3 u_color3;
-uniform float u_speed;
-uniform float u_scale;
-uniform int u_type;
-uniform float u_noise;
-varying vec2 vUv;
+  uniform float u_time;
+  uniform vec3 u_color1;
+  uniform vec3 u_color2;  
+  uniform vec3 u_color3;
+  uniform float u_speed;
+  uniform float u_scale;
+  uniform int u_type;
+  uniform float u_noise;
+  varying vec2 vUv;
 
-float noise(vec2 st) {
-  return fract(sin(dot(st, vec2(12.9898, 78.233))) * 43758.5453);
-}
+  #define PI 3.14159265359
 
-vec3 linearGradient(vec2 uv, float time) {
-  float t = uv.y + sin(uv.x * 3.14159 + time) * 0.1;
-  return t < 0.5 
-    ? mix(u_color1, u_color2, t * 2.0)
-    : mix(u_color2, u_color3, (t - 0.5) * 2.0);
-}
-
-vec3 radialGradient(vec2 uv, float time) {
-  vec2 center = vec2(0.5);
-  float dist = length(uv - center) * u_scale + sin(time) * 0.1;
-  return dist < 0.5
-    ? mix(u_color1, u_color2, dist * 2.0)
-    : mix(u_color2, u_color3, clamp((dist - 0.5) * 2.0, 0.0, 1.0));
-}
-
-vec3 diagonalGradient(vec2 uv, float time) {
-  float t = (uv.x + uv.y) * 0.5 + sin(time) * 0.05;
-  return t < 0.5
-    ? mix(u_color1, u_color2, t * 2.0) 
-    : mix(u_color2, u_color3, (t - 0.5) * 2.0);
-}
-
-vec3 animatedGradient(vec2 uv, float time) {
-  vec2 pos = uv * u_scale + vec2(sin(time), cos(time * 0.7)) * 0.2;
-  
-  float n1 = sin(pos.x * 3.0 + time) * sin(pos.y * 2.5 + time * 1.1);
-  float n2 = cos(pos.x * 2.0 + time * 0.8) * cos(pos.y * 3.5 + time * 0.6);
-  float blend = (n1 + n2) * 0.5 + 0.5;
-  
-  vec3 col1 = mix(u_color1, u_color2, blend);
-  vec3 col2 = mix(u_color2, u_color3, sin(blend * 3.14159 + time) * 0.5 + 0.5);
-  
-  return mix(col1, col2, uv.y);
-}
-
-void main() {
-  vec2 uv = vUv;
-  float time = u_time * u_speed;
-  
-  vec3 color;
-  
-  if (u_type == 0) {
-    color = linearGradient(uv, time);
-  } else if (u_type == 1) {
-    color = radialGradient(uv, time);
-  } else if (u_type == 2) {
-    color = diagonalGradient(uv, time);
-  } else {
-    color = animatedGradient(uv, time);
+  float noise(vec2 st) {
+    return fract(sin(dot(st, vec2(12.9898, 78.233))) * 43758.5453);
   }
-  
-  if (u_noise > 0.001) {
-    float grain = noise(uv * 200.0 + time * 0.1);
-    color *= (1.0 - u_noise * 0.4 + u_noise * grain * 0.4);
+
+  vec3 linearGradient(vec2 uv, float time) {
+    float t = (uv.y * u_scale) + sin(uv.x * PI + time) * 0.1;
+    
+    t = clamp(t, 0.0, 1.0);
+    
+    return t < 0.5 
+      ? mix(u_color1, u_color2, t * 2.0)
+      : mix(u_color2, u_color3, (t - 0.5) * 2.0);
   }
-  
-  gl_FragColor = vec4(color, 1.0);
-}
+
+  vec3 radialGradient(vec2 uv, float time) {
+    vec2 center = vec2(0.5);
+    float dist = length(uv - center) * u_scale + sin(time) * 0.1;
+    
+    return dist < 0.5
+      ? mix(u_color1, u_color2, dist * 2.0)
+      : mix(u_color2, u_color3, clamp((dist - 0.5) * 2.0, 0.0, 1.0));
+  }
+
+  vec3 diagonalGradient(vec2 uv, float time) {
+    float t = ((uv.x + uv.y) * 0.5 * u_scale) + sin(time) * 0.05;
+    
+    t = clamp(t, 0.0, 1.0);
+    
+    return t < 0.5
+      ? mix(u_color1, u_color2, t * 2.0) 
+      : mix(u_color2, u_color3, (t - 0.5) * 2.0);
+  }
+
+  vec3 conicGradient(vec2 uv, float time) {
+    vec2 center = vec2(0.5);
+    vec2 pos = uv - center;
+    
+    float angle = atan(pos.y, pos.x);
+    
+    float normalizedAngle = (angle + PI) / (2.0 * PI);
+    
+    float t = fract(normalizedAngle * u_scale + time * 0.3);
+    
+    float smoothT = t;
+    
+    vec3 color;
+    if (smoothT < 0.33) {
+      color = mix(u_color1, u_color2, smoothstep(0.0, 0.33, smoothT));
+    } else if (smoothT < 0.66) {
+      color = mix(u_color2, u_color3, smoothstep(0.33, 0.66, smoothT));
+    } else {
+      color = mix(u_color3, u_color1, smoothstep(0.66, 1.0, smoothT));
+    }
+    
+    float dist = length(pos);
+    color += sin(dist * 8.0 + time * 1.5) * 0.03;
+    
+    return color;
+  }
+
+  vec3 animatedGradient(vec2 uv, float time) {
+    vec2 pos = uv * u_scale + vec2(sin(time), cos(time * 0.7)) * 0.2;
+    
+    float n1 = sin(pos.x * 3.0 + time) * sin(pos.y * 2.5 + time * 1.1);
+    float n2 = cos(pos.x * 2.0 + time * 0.8) * cos(pos.y * 3.5 + time * 0.6);
+    float blend = (n1 + n2) * 0.5 + 0.5;
+    
+    vec3 col1 = mix(u_color1, u_color2, blend);
+    vec3 col2 = mix(u_color2, u_color3, sin(blend * PI + time) * 0.5 + 0.5);
+    
+    return mix(col1, col2, uv.y);
+  }
+
+  void main() {
+    vec2 uv = vUv;
+    float time = u_time * u_speed;
+    
+    vec3 color;
+    
+    if (u_type == 0) {
+      color = linearGradient(uv, time);
+    } else if (u_type == 1) {
+      color = radialGradient(uv, time);
+    } else if (u_type == 2) {
+      color = diagonalGradient(uv, time);
+    } else if (u_type == 3) {
+      color = conicGradient(uv, time);
+    } else {
+      color = animatedGradient(uv, time);
+    }
+    
+    if (u_noise > 0.001) {
+      float grain = noise(uv * 200.0 + time * 0.1);
+      color *= (1.0 - u_noise * 0.4 + u_noise * grain * 0.4);
+    }
+    
+    gl_FragColor = vec4(color, 1.0);
+  }
 `
 
 const DEFAULT_CONFIG: GradientConfig = {
@@ -138,7 +182,8 @@ const gradientTypeNumber = {
   linear: 0,
   radial: 1,
   diagonal: 2,
-  animated: 3,
+  conic: 3,
+  animated: 4,
 }
 
 export default function GradFlow({
@@ -258,12 +303,8 @@ export default function GradFlow({
   return (
     <canvas
       ref={canvasRef}
-      className={cn('w-full h-full block', className)}
-      style={{
-        touchAction: 'none',
-        userSelect: 'none',
-      }}
-      aria-label='Animated gradient background'
+      className={cn('w-full h-full block select-none touch-none', className)}
+      aria-label='gradflow animated gradient background'
     />
   )
 }

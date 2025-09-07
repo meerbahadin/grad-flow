@@ -1,7 +1,17 @@
 'use client'
 
 import { useEffect, useRef, useCallback, useMemo, useState } from 'react'
+import Image from 'next/image'
+import Link from 'next/link'
 import { Mesh, Program, Renderer, Transform, Plane } from 'ogl'
+import {
+  IconBrandGithub,
+  IconCode,
+  IconDownload,
+  IconScreenshot,
+  IconSettings,
+  IconWand,
+} from '@tabler/icons-react'
 
 import {
   Select,
@@ -13,111 +23,13 @@ import {
   SelectValue,
 } from './ui/select'
 
-import { cn } from '@/lib/utils'
 import { Button } from './ui/button'
 import { Slider } from './ui/slider'
 
-import { GradFlowProps, GradientConfig, GradientType, RGB } from '@/types'
-import {
-  IconBrandGithub,
-  IconCode,
-  IconDownload,
-  IconScreenshot,
-  IconSettings,
-  IconWand,
-} from '@tabler/icons-react'
-import Image from 'next/image'
-import Link from 'next/link'
+import { cn } from '@/lib/utils'
+import { GradFlowProps, GradientConfig, GradientType, RGB } from './grad-flow'
 
-export const vertexShader = `
-attribute vec2 position;
-varying vec2 vUv;
-void main() {
-  vUv = position * 0.5 + 0.5;
-  gl_Position = vec4(position, 0.0, 1.0);
-}
-`
-
-export const fragmentShader = `
-#ifdef GL_FRAGMENT_PRECISION_HIGH
-  precision highp float;
-#else
-  precision mediump float;
-#endif
-
-uniform float u_time;
-uniform vec3 u_color1;
-uniform vec3 u_color2;  
-uniform vec3 u_color3;
-uniform float u_speed;
-uniform float u_scale;
-uniform int u_type;
-uniform float u_noise;
-varying vec2 vUv;
-
-float noise(vec2 st) {
-  return fract(sin(dot(st, vec2(12.9898, 78.233))) * 43758.5453);
-}
-
-vec3 linearGradient(vec2 uv, float time) {
-  float t = uv.y + sin(uv.x * 3.14159 + time) * 0.1;
-  return t < 0.5 
-    ? mix(u_color1, u_color2, t * 2.0)
-    : mix(u_color2, u_color3, (t - 0.5) * 2.0);
-}
-
-vec3 radialGradient(vec2 uv, float time) {
-  vec2 center = vec2(0.5);
-  float dist = length(uv - center) * u_scale + sin(time) * 0.1;
-  return dist < 0.5
-    ? mix(u_color1, u_color2, dist * 2.0)
-    : mix(u_color2, u_color3, clamp((dist - 0.5) * 2.0, 0.0, 1.0));
-}
-
-vec3 diagonalGradient(vec2 uv, float time) {
-  float t = (uv.x + uv.y) * 0.5 + sin(time) * 0.05;
-  return t < 0.5
-    ? mix(u_color1, u_color2, t * 2.0) 
-    : mix(u_color2, u_color3, (t - 0.5) * 2.0);
-}
-
-vec3 animatedGradient(vec2 uv, float time) {
-  vec2 pos = uv * u_scale + vec2(sin(time), cos(time * 0.7)) * 0.2;
-  
-  float n1 = sin(pos.x * 3.0 + time) * sin(pos.y * 2.5 + time * 1.1);
-  float n2 = cos(pos.x * 2.0 + time * 0.8) * cos(pos.y * 3.5 + time * 0.6);
-  float blend = (n1 + n2) * 0.5 + 0.5;
-  
-  vec3 col1 = mix(u_color1, u_color2, blend);
-  vec3 col2 = mix(u_color2, u_color3, sin(blend * 3.14159 + time) * 0.5 + 0.5);
-  
-  return mix(col1, col2, uv.y);
-}
-
-void main() {
-  vec2 uv = vUv;
-  float time = u_time * u_speed;
-  
-  vec3 color;
-  
-  if (u_type == 0) {
-    color = linearGradient(uv, time);
-  } else if (u_type == 1) {
-    color = radialGradient(uv, time);
-  } else if (u_type == 2) {
-    color = diagonalGradient(uv, time);
-  } else {
-    color = animatedGradient(uv, time);
-  }
-  
-  if (u_noise > 0.001) {
-    float grain = noise(uv * 200.0 + time * 0.1);
-    color *= (1.0 - u_noise * 0.4 + u_noise * grain * 0.4);
-  }
-  
-  gl_FragColor = vec4(color, 1.0);
-}
-`
+import { fragmentShader, vertexShader } from './grad-flow'
 
 const DEFAULT_CONFIG: GradientConfig = {
   color1: { r: 107, g: 85, b: 216 },
@@ -130,12 +42,6 @@ const DEFAULT_CONFIG: GradientConfig = {
 }
 
 const PRESETS = {
-  ocean: {
-    color1: { r: 255, g: 107, b: 107 },
-    color2: { r: 78, g: 205, b: 196 },
-    color3: { r: 69, g: 183, b: 209 },
-    noise: 0.15,
-  },
   purple: {
     color1: { r: 102, g: 126, b: 234 },
     color2: { r: 118, g: 75, b: 162 },
@@ -153,6 +59,15 @@ const PRESETS = {
     color2: { r: 254, g: 214, b: 227 },
     color3: { r: 210, g: 153, b: 194 },
     noise: 0.02,
+  },
+  modern: {
+    color1: { r: 255, g: 255, b: 255 },
+    color2: { r: 241, g: 96, b: 59 },
+    color3: { r: 22, g: 87, b: 218 },
+    speed: 0.6,
+    scale: 1,
+    type: 'conic',
+    noise: 0.15,
   },
 } as const
 
@@ -187,7 +102,8 @@ const gradientTypeNumber = {
   linear: 0,
   radial: 1,
   diagonal: 2,
-  animated: 3,
+  conic: 3,
+  animated: 4,
 }
 
 const captureImage = (
@@ -269,8 +185,8 @@ export default function GradFlowDemo({
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const rendererRef = useRef<Renderer | null>(null)
   const programRef = useRef<Program | null>(null)
-  const meshRef = useRef<Mesh | null>(null) // Added mesh reference
-  const sceneRef = useRef<Transform | null>(null) // Added scene reference
+  const meshRef = useRef<Mesh | null>(null)
+  const sceneRef = useRef<Transform | null>(null)
   const rafRef = useRef<number>(0)
 
   const normalizedColors = useMemo(
@@ -416,214 +332,207 @@ export default function GradFlowDemo({
   }, [])
 
   return (
-    <div className='w-full h-screen'>
-      <div className='h-full w-full flex flex-col items-center justify-between relative py-2 container'>
-        <div className='flex w-full max-w-md z-50'>
-          <div className='flex justify-between items-center w-full p-3 bg-gradient-to-tr from-background to-transparent outline-1 outline-offset-2 outline-white/15 rounded-lg backdrop-blur-lg'>
-            <IconWand />
-            <div className='relative'>
-              <Button
-                className='capitalize cursor-pointer'
-                onClick={() => setShowControls(!showControls)}
-              >
-                <IconSettings />
-                playground
-              </Button>
+    <div className='h-screen w-full flex flex-col items-center justify-between relative py-2 rounded-3xl'>
+      <div className='flex w-full max-w-md z-50 container'>
+        <div className='flex justify-between items-center w-full p-3 bg-gradient-to-tr from-background to-transparent outline-1 outline-offset-2 outline-white/15 rounded-lg backdrop-blur-lg'>
+          <IconWand />
+          <div className='relative'>
+            <Button
+              className='capitalize cursor-pointer'
+              onClick={() => setShowControls(!showControls)}
+            >
+              <IconSettings />
+              playground
+            </Button>
 
-              {showControls && (
-                <div className='bg-background absolute top-14 right-0 text-foreground backdrop-blur-sm rounded-lg p-4 space-y-4 overflow-y-auto z-[60] w-80 shadow-lg border'>
-                  <h3 className='font-semibold mb-3'>Gradient Controls</h3>
+            {showControls && (
+              <div className='bg-background absolute top-14 right-0 text-foreground backdrop-blur-sm rounded-lg p-4 space-y-4 overflow-y-auto z-[60] w-80 shadow-lg border'>
+                <h3 className='font-semibold mb-3'>Gradient Controls</h3>
 
-                  <Select
-                    value={config.type}
-                    onValueChange={(e) =>
-                      updateConfig({ type: e as GradientType })
-                    }
-                  >
-                    <SelectTrigger className='w-full'>
-                      <SelectValue placeholder='Select a type' />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        <SelectLabel>Type</SelectLabel>
-                        <SelectItem value='linear'>Linear</SelectItem>
-                        <SelectItem value='radial'>Radial</SelectItem>
-                        <SelectItem value='diagonal'>Diagonal</SelectItem>
-                        <SelectItem value='animated'>Animated</SelectItem>
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
+                <Select
+                  value={config.type}
+                  onValueChange={(e) =>
+                    updateConfig({ type: e as GradientType })
+                  }
+                >
+                  <SelectTrigger className='w-full'>
+                    <SelectValue placeholder='Select a type' />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>Type</SelectLabel>
+                      <SelectItem value='linear'>Linear</SelectItem>
+                      <SelectItem value='radial'>Radial</SelectItem>
+                      <SelectItem value='diagonal'>Diagonal</SelectItem>
+                      <SelectItem value='conic'>Conic</SelectItem>
+                      <SelectItem value='animated'>Animated</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
 
-                  <div className='space-y-2'>
-                    {(['color1', 'color2', 'color3'] as const).map(
-                      (colorKey, idx) => (
-                        <div
-                          key={colorKey}
-                          className='flex items-center space-x-3'
-                        >
-                          <label className='text-xs w-12'>
-                            Color {idx + 1}
-                          </label>
-                          <input
-                            type='color'
-                            value={rgbToHex(config[colorKey])}
-                            onChange={(e) =>
-                              updateConfig({
-                                [colorKey]: hexToRgb(e.target.value),
-                              })
-                            }
-                            className='w-10 h-6 rounded border cursor-pointer'
-                          />
-                          <input
-                            type='text'
-                            value={rgbToHex(config[colorKey])}
-                            onChange={(e) =>
-                              updateConfig({
-                                [colorKey]: hexToRgb(e.target.value),
-                              })
-                            }
-                            className='flex-1 border rounded px-2 py-1 text-xs'
-                          />
-                        </div>
-                      )
-                    )}
-                  </div>
-
-                  <div>
-                    <label className='block text-sm mb-1'>
-                      Speed: {config.speed.toFixed(1)}
-                    </label>
-                    <Slider
-                      min={0}
-                      onValueChange={(e) => updateConfig({ speed: Number(e) })}
-                      value={[config.speed]}
-                      max={3}
-                      step={0.1}
-                      aria-label='speed'
-                    />
-                  </div>
-
-                  <div>
-                    <label className='block text-sm mb-1'>
-                      Scale: {config.scale.toFixed(1)}
-                    </label>
-                    <Slider
-                      min={0.5}
-                      onValueChange={(e) => updateConfig({ scale: Number(e) })}
-                      value={[config.scale]}
-                      max={3}
-                      step={0.1}
-                      aria-label='scale'
-                    />
-                  </div>
-
-                  <div>
-                    <label className='block text-sm mb-1'>
-                      Noise: {config.noise.toFixed(2)}
-                    </label>
-                    <Slider
-                      min={0}
-                      onValueChange={(e) => updateConfig({ noise: Number(e) })}
-                      value={[config.noise]}
-                      max={0.5}
-                      step={0.01}
-                      aria-label='noise'
-                    />
-                  </div>
-
-                  <div>
-                    <p className='text-sm mb-2'>Presets:</p>
-                    <div className='grid grid-cols-2 gap-1'>
-                      {Object.keys(PRESETS).map((preset) => (
-                        <Button
-                          key={preset}
-                          onClick={() =>
-                            applyPreset(preset as keyof typeof PRESETS)
+                <div className='space-y-2'>
+                  {(['color1', 'color2', 'color3'] as const).map(
+                    (colorKey, idx) => (
+                      <div
+                        key={colorKey}
+                        className='flex items-center space-x-3'
+                      >
+                        <label className='text-xs w-12'>Color {idx + 1}</label>
+                        <input
+                          type='color'
+                          value={rgbToHex(config[colorKey])}
+                          onChange={(e) =>
+                            updateConfig({
+                              [colorKey]: hexToRgb(e.target.value),
+                            })
                           }
-                          variant='outline'
-                          size='sm'
-                          className='text-xs capitalize'
-                        >
-                          {preset}
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
+                          className='w-10 h-6 rounded border cursor-pointer'
+                        />
+                        <input
+                          type='text'
+                          value={rgbToHex(config[colorKey])}
+                          onChange={(e) =>
+                            updateConfig({
+                              [colorKey]: hexToRgb(e.target.value),
+                            })
+                          }
+                          className='flex-1 border rounded px-2 py-1 text-xs'
+                        />
+                      </div>
+                    )
+                  )}
+                </div>
 
-                  <div className='flex gap-2'>
-                    <Button
-                      className='flex-1 capitalize cursor-pointer'
-                      onClick={() => copyCodeToClipboard(config)}
-                      size='icon'
-                    >
-                      <IconCode />
-                      copy config
-                    </Button>
-                    <Button
-                      variant='outline'
-                      className='cursor-pointer'
-                      onClick={handleCaptureImage}
-                      title='Capture Image'
-                    >
-                      <IconScreenshot />
-                    </Button>
+                <div>
+                  <label className='block text-sm mb-1'>
+                    Speed: {config.speed.toFixed(1)}
+                  </label>
+                  <Slider
+                    min={0}
+                    onValueChange={(e) => updateConfig({ speed: Number(e) })}
+                    value={[config.speed]}
+                    max={3}
+                    step={0.1}
+                    aria-label='speed'
+                  />
+                </div>
+
+                <div>
+                  <label className='block text-sm mb-1'>
+                    Scale: {config.scale.toFixed(1)}
+                  </label>
+                  <Slider
+                    min={0.5}
+                    onValueChange={(e) => updateConfig({ scale: Number(e) })}
+                    value={[config.scale]}
+                    max={3}
+                    step={0.1}
+                    aria-label='scale'
+                  />
+                </div>
+
+                <div>
+                  <label className='block text-sm mb-1'>
+                    Noise: {config.noise.toFixed(2)}
+                  </label>
+                  <Slider
+                    min={0}
+                    onValueChange={(e) => updateConfig({ noise: Number(e) })}
+                    value={[config.noise]}
+                    max={0.5}
+                    step={0.01}
+                    aria-label='noise'
+                  />
+                </div>
+
+                <div>
+                  <p className='text-sm mb-2'>Presets:</p>
+                  <div className='grid grid-cols-2 gap-1'>
+                    {Object.keys(PRESETS).map((preset) => (
+                      <Button
+                        key={preset}
+                        onClick={() =>
+                          applyPreset(preset as keyof typeof PRESETS)
+                        }
+                        variant='outline'
+                        size='sm'
+                        className='text-xs capitalize'
+                      >
+                        {preset}
+                      </Button>
+                    ))}
                   </div>
                 </div>
-              )}
-            </div>
+
+                <div className='flex gap-2'>
+                  <Button
+                    className='flex-1 capitalize cursor-pointer'
+                    onClick={() => copyCodeToClipboard(config)}
+                    size='icon'
+                  >
+                    <IconCode />
+                    copy config
+                  </Button>
+                  <Button
+                    variant='outline'
+                    className='cursor-pointer'
+                    onClick={handleCaptureImage}
+                    title='Capture Image'
+                  >
+                    <IconScreenshot />
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
-        <div className='gap-4 flex flex-col items-center max-w-4xl'>
-          <div className='space-y-2 text-white text-center'>
-            <h1 className='bg-gradient-to-tr from-white via-white to-transparent bg-clip-text text-transparent text-4xl md:text-7xl font-bold leading-tight text-balance'>
-              Create Amazing Gradients Using WebGL
-            </h1>
-            <p className='md:text-xl leading-relaxed text-balance'>
-              High-performance WebGL gradient backgrounds, film grain effects,
-              and realtime customization for modern web applications.
-            </p>
-          </div>
+      </div>
 
-          <Link href='/#installation'>
-            <Button className='capitalize cursor-pointer'>
-              <IconDownload />
-              installation
+      <div className='gap-4 flex flex-col items-center max-w-4xl'>
+        <div className='space-y-2 text-white text-center'>
+          <h1 className='bg-gradient-to-tr from-white via-white to-transparent bg-clip-text text-transparent text-4xl md:text-7xl font-bold leading-tight text-balance'>
+            Create Amazing Gradients Using WebGL
+          </h1>
+          <p className='md:text-xl leading-relaxed text-balance'>
+            High-performance WebGL gradient backgrounds, film grain effects, and
+            realtime customization for modern web applications.
+          </p>
+        </div>
+
+        <Link href='/#installation'>
+          <Button className='capitalize cursor-pointer'>
+            <IconDownload />
+            installation
+          </Button>
+        </Link>
+      </div>
+
+      <div className='flex w-full items-center justify-between gap-2 container'>
+        <Link href='https://www.meera.dev/' target='_blank'>
+          <Image
+            src='https://www.meera.dev/logo.svg'
+            width={28}
+            height={28}
+            alt='Meera Dev Logo'
+            className='w-8 h-8 mask-t-from-40%'
+          />
+        </Link>
+
+        <div className='flex gap-2'>
+          <Link target='_blank' href='https://github.com/meerbahadin/grad-flow'>
+            <Button size='icon' className='cursor-pointer'>
+              <IconBrandGithub />
             </Button>
           </Link>
-        </div>
-
-        <div className='flex w-full items-center justify-between gap-2'>
-          <Link href='https://www.meera.dev/' target='_blank'>
-            <Image
-              src='https://www.meera.dev/logo.svg'
-              width={28}
-              height={28}
-              alt='Meera Dev Logo'
-              className='w-8 h-8 mask-t-from-40%'
-            />
-          </Link>
-
-          <div className='flex gap-2'>
-            <Link
-              target='_blank'
-              href='https://github.com/meerbahadin/grad-flow'
-            >
-              <Button size='icon' className='cursor-pointer'>
-                <IconBrandGithub />
-              </Button>
-            </Link>
-          </div>
         </div>
       </div>
 
       <canvas
         ref={canvasRef}
-        className={cn('w-full h-full block absolute -z-10 top-0', className)}
-        style={{
-          touchAction: 'none',
-          userSelect: 'none',
-        }}
-        aria-label='Animated gradient background'
+        className={cn(
+          'w-full h-full block absolute -z-10 top-0 touch-none select-none',
+          className
+        )}
       />
     </div>
   )
