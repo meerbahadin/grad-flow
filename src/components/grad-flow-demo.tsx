@@ -163,11 +163,9 @@ const copyCodeToClipboard = (config: GradientConfig) => {
   navigator.clipboard
     .writeText(codeString)
     .then(() => {
-      console.log('Code copied to clipboard!')
       alert('Code copied to clipboard!')
     })
-    .catch((err) => {
-      console.error('Failed to copy: ', err)
+    .catch(() => {
       alert('Failed to copy code. Please try again.')
     })
 }
@@ -520,7 +518,10 @@ export default function GradFlowDemo({
 
         <div className='flex gap-2'>
           <Link target='_blank' href='https://github.com/meerbahadin/grad-flow'>
-            <Button size='icon' className='cursor-pointer'>
+            <Button
+              size='icon'
+              className='cursor-pointer dark text-foreground bg-background/30 hover:bg-background/50'
+            >
               <IconBrandGithub />
             </Button>
           </Link>
