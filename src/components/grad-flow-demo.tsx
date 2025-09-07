@@ -67,7 +67,7 @@ const PRESETS = {
     speed: 0.6,
     scale: 1,
     type: 'conic',
-    noise: 0.15,
+    noise: 0.1,
   },
 } as const
 
@@ -494,8 +494,8 @@ export default function GradFlowDemo({
             Create Amazing Gradients Using WebGL
           </h1>
           <p className='md:text-xl leading-relaxed text-balance'>
-            High-performance WebGL gradient backgrounds, film grain effects, and
-            realtime customization for modern web applications.
+            High-performance React component for animated WebGL gradient
+            backgrounds with real-time customization.
           </p>
         </div>
 

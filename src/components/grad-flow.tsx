@@ -169,7 +169,7 @@ const DEFAULT_CONFIG: GradientConfig = {
   speed: 0.6,
   scale: 1.2,
   type: 'animated',
-  noise: 0.15,
+  noise: 0.1,
 }
 
 const normalizeRgb = (rgb: RGB): [number, number, number] => [
