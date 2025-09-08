@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from './ui/button'
-import { IconBrandGithub, IconDownload } from '@tabler/icons-react'
+import { Download, Github } from 'lucide-react'
 
 const ContentDemo = () => {
   return (
@@ -20,7 +20,7 @@ const ContentDemo = () => {
 
         <Link href='/#installation'>
           <Button className='capitalize cursor-pointer'>
-            <IconDownload />
+            <Download />
             installation
           </Button>
         </Link>
@@ -42,7 +42,7 @@ const ContentDemo = () => {
               size='icon'
               className='cursor-pointer dark text-foreground bg-background/30 hover:bg-background/50'
             >
-              <IconBrandGithub />
+              <Github />
             </Button>
           </Link>
         </div>

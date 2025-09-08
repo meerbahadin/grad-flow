@@ -4,13 +4,6 @@ import { useEffect, useRef, useCallback, useMemo, useState } from 'react'
 import { Mesh, Program, Renderer, Transform, Plane } from 'ogl'
 
 import {
-  IconCode,
-  IconScreenshot,
-  IconSettings,
-  IconWand,
-} from '@tabler/icons-react'
-
-import {
   Select,
   SelectContent,
   SelectGroup,
@@ -34,6 +27,8 @@ import {
 } from './grad-flow'
 
 import ContentDemo from './content-demo'
+import { Code, ImageDown, Settings, Wand } from 'lucide-react'
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 
 const DEFAULT_CONFIG: GradientConfig = {
   color1: { r: 107, g: 85, b: 216 },
@@ -197,12 +192,12 @@ export default function GradFlowDemo({
   config: initialConfig,
   className = '',
 }: GradFlowProps) {
-  const [showControls, setShowControls] = useState(false)
   const [config, setConfig] = useState<GradientConfig>({
     ...DEFAULT_CONFIG,
     ...initialConfig,
   })
 
+  const menuRef = useRef<HTMLDivElement | null>(null)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const rendererRef = useRef<Renderer | null>(null)
   const programRef = useRef<Program | null>(null)
@@ -338,12 +333,12 @@ export default function GradFlowDemo({
     const mesh = meshRef.current
 
     if (!canvas) {
-      alert('canvas not found. please try again.')
+      console.log('canvas not found. please try again.')
       return
     }
 
     if (!renderer) {
-      alert('renderer not initialized. please try again.')
+      console.log('renderer not initialized. please try again.')
       return
     }
 
@@ -354,18 +349,16 @@ export default function GradFlowDemo({
     <div className='h-screen w-full flex flex-col items-center justify-between relative py-2 rounded-3xl'>
       <div className='flex w-full max-w-md z-50 container'>
         <div className='flex justify-between items-center w-full p-3 bg-gradient-to-tr from-background to-transparent outline-1 outline-offset-2 outline-white/15 rounded-lg backdrop-blur-lg'>
-          <IconWand />
+          <Wand />
           <div className='relative'>
-            <Button
-              className='capitalize cursor-pointer'
-              onClick={() => setShowControls(!showControls)}
-            >
-              <IconSettings />
-              playground
-            </Button>
-
-            {showControls && (
-              <div className='bg-background absolute top-14 right-0 text-foreground backdrop-blur-sm rounded-lg p-4 space-y-4 overflow-y-auto z-[60] w-80 shadow-lg border'>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button className='capitalize cursor-pointer'>
+                  <Settings />
+                  playground
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className='space-y-4'>
                 <h3 className='font-semibold mb-3'>Gradient Controls</h3>
 
                 <Select
@@ -490,7 +483,7 @@ export default function GradFlowDemo({
                     onClick={() => copyCodeToClipboard(config)}
                     size='icon'
                   >
-                    <IconCode />
+                    <Code />
                     copy config
                   </Button>
                   <Button
@@ -499,11 +492,11 @@ export default function GradFlowDemo({
                     onClick={handleCaptureImage}
                     title='Capture Image'
                   >
-                    <IconScreenshot />
+                    <ImageDown />
                   </Button>
                 </div>
-              </div>
-            )}
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
       </div>

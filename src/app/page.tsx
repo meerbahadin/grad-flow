@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import CodeBlock from '@/components/code/code-block'
 import GradFlowDemo from '@/components/grad-flow-demo'
 
-import { IconBrandGithub } from '@tabler/icons-react'
+import { Github } from 'lucide-react'
 
 export default function Home() {
   return (
@@ -108,7 +108,7 @@ export function cn(...inputs: ClassValue[]) {
                 size='icon'
                 className='cursor-pointer'
               >
-                <IconBrandGithub />
+                <Github />
               </Button>
             </Link>
           </div>
