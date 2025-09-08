@@ -27,6 +27,7 @@ export type GradientType =
   | 'diagonal'
   | 'animated'
   | 'conic'
+  | 'wave'
 
 export type GradFlowProps = {
   config?: Partial<GradientConfig>
@@ -68,7 +69,6 @@ export const fragmentShader = `
 
   vec3 linearGradient(vec2 uv, float time) {
     float t = (uv.y * u_scale) + sin(uv.x * PI + time) * 0.1;
-    
     t = clamp(t, 0.0, 1.0);
     
     return t < 0.5 
@@ -87,7 +87,6 @@ export const fragmentShader = `
 
   vec3 diagonalGradient(vec2 uv, float time) {
     float t = ((uv.x + uv.y) * 0.5 * u_scale) + sin(time) * 0.05;
-    
     t = clamp(t, 0.0, 1.0);
     
     return t < 0.5
@@ -100,20 +99,16 @@ export const fragmentShader = `
     vec2 pos = uv - center;
     
     float angle = atan(pos.y, pos.x);
-    
     float normalizedAngle = (angle + PI) / (2.0 * PI);
-    
     float t = fract(normalizedAngle * u_scale + time * 0.3);
     
-    float smoothT = t;
-    
     vec3 color;
-    if (smoothT < 0.33) {
-      color = mix(u_color1, u_color2, smoothstep(0.0, 0.33, smoothT));
-    } else if (smoothT < 0.66) {
-      color = mix(u_color2, u_color3, smoothstep(0.33, 0.66, smoothT));
+    if (t < 0.33) {
+      color = mix(u_color1, u_color2, smoothstep(0.0, 0.33, t));
+    } else if (t < 0.66) {
+      color = mix(u_color2, u_color3, smoothstep(0.33, 0.66, t));
     } else {
-      color = mix(u_color3, u_color1, smoothstep(0.66, 1.0, smoothT));
+      color = mix(u_color3, u_color1, smoothstep(0.66, 1.0, t));
     }
     
     float dist = length(pos);
@@ -135,6 +130,35 @@ export const fragmentShader = `
     return mix(col1, col2, uv.y);
   }
 
+  vec3 waveGradient(vec2 uv, float time) {
+    float y = uv.y;
+    
+    float wave1 = sin(uv.x * PI * u_scale * 0.8 + time * u_speed * 0.5) * 0.1;
+    float wave2 = sin(uv.x * PI * u_scale * 0.5 + time * u_speed * 0.3) * 0.15;  
+    float wave3 = sin(uv.x * PI * u_scale * 1.2 + time * u_speed * 0.8) * 0.2; 
+    
+    float flowingY = y + wave1 + wave2 + wave3;
+    float pattern = clamp(flowingY, 0.0, 1.0);
+    pattern = smoothstep(0.0, 1.0, pattern);
+    
+    vec3 color;
+    if (pattern < 0.33) {
+      float t = smoothstep(0.0, 0.33, pattern);
+      color = mix(u_color1, u_color2, t);
+    } else if (pattern < 0.66) {
+      float t = smoothstep(0.33, 0.66, pattern);
+      color = mix(u_color2, u_color3, t);
+    } else {
+      float t = smoothstep(0.66, 1.0, pattern);
+      color = mix(u_color3, u_color1, t);
+    }
+    
+    float variation = sin(uv.x * PI * 2.0 + time * u_speed) * 
+    color += variation;
+    
+    return clamp(color, 0.0, 1.0);
+  }
+
   void main() {
     vec2 uv = vUv;
     float time = u_time * u_speed;
@@ -149,8 +173,10 @@ export const fragmentShader = `
       color = diagonalGradient(uv, time);
     } else if (u_type == 3) {
       color = conicGradient(uv, time);
-    } else {
+    } else if (u_type == 4) {
       color = animatedGradient(uv, time);
+    } else {
+      color = waveGradient(uv, time);
     }
     
     if (u_noise > 0.001) {
@@ -184,6 +210,7 @@ const gradientTypeNumber = {
   diagonal: 2,
   conic: 3,
   animated: 4,
+  wave: 5,
 }
 
 export default function GradFlow({

@@ -24,9 +24,15 @@ import { Button } from './ui/button'
 import { Slider } from './ui/slider'
 
 import { cn } from '@/lib/utils'
-import { GradFlowProps, GradientConfig, GradientType, RGB } from './grad-flow'
+import {
+  fragmentShader,
+  GradFlowProps,
+  GradientConfig,
+  GradientType,
+  RGB,
+  vertexShader,
+} from './grad-flow'
 
-import { fragmentShader, vertexShader } from './grad-flow'
 import ContentDemo from './content-demo'
 
 const DEFAULT_CONFIG: GradientConfig = {
@@ -67,6 +73,24 @@ const PRESETS = {
     type: 'conic',
     noise: 0.1,
   },
+  ocean: {
+    color1: { r: 207, g: 229, b: 242 },
+    color2: { r: 0, g: 180, b: 216 },
+    color3: { r: 144, g: 224, b: 239 },
+    speed: 0.8,
+    scale: 1,
+    type: 'wave',
+    noise: 0.08,
+  },
+  frequency: {
+    color1: { r: 255, g: 255, b: 255 },
+    color2: { r: 255, g: 100, b: 61 },
+    color3: { r: 71, g: 29, b: 114 },
+    speed: 0.6,
+    scale: 1.0,
+    type: 'wave',
+    noise: 0.15,
+  },
 } as const
 
 const normalizeRgb = (rgb: RGB): [number, number, number] => [
@@ -102,6 +126,7 @@ const gradientTypeNumber = {
   diagonal: 2,
   conic: 3,
   animated: 4,
+  wave: 5,
 }
 
 const captureImage = (
@@ -276,7 +301,6 @@ export default function GradFlowDemo({
       cancelAnimationFrame(rafRef.current)
       window.removeEventListener('resize', handleResize)
 
-      // Clean up refs
       meshRef.current = null
       sceneRef.current = null
       programRef.current = null
@@ -285,7 +309,6 @@ export default function GradFlowDemo({
       const loseContext = gl.getExtension('WEBGL_lose_context')
       loseContext?.loseContext()
     }
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -362,6 +385,7 @@ export default function GradFlowDemo({
                       <SelectItem value='diagonal'>Diagonal</SelectItem>
                       <SelectItem value='conic'>Conic</SelectItem>
                       <SelectItem value='animated'>Animated</SelectItem>
+                      <SelectItem value='wave'>Wave</SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>
