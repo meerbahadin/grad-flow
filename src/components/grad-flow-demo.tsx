@@ -197,7 +197,6 @@ export default function GradFlowDemo({
     ...initialConfig,
   })
 
-  const menuRef = useRef<HTMLDivElement | null>(null)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const rendererRef = useRef<Renderer | null>(null)
   const programRef = useRef<Program | null>(null)
