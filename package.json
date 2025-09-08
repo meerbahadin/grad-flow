@@ -21,6 +21,7 @@
     "ogl": "^1.0.11",
     "react": "19.1.0",
     "react-dom": "19.1.0",
+    "react-ogl": "^0.15.1",
     "rehype-pretty-code": "^0.14.1",
     "shiki": "^3.12.2",
     "tailwind-merge": "^3.3.1"
