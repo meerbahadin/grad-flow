@@ -72,13 +72,13 @@ export function cn(...inputs: ClassValue[]) {
   <GradFlow
     className='-z-10 absolute'
     config={{
-      color1: { r: 107, g: 85, b: 216 },
-      color2: { r: 241, g: 96, b: 59 },
-      color3: { r: 255, g: 255, b: 255 },
-      speed: 0.6,
-      scale: 1.2,
-      type: 'animated',
-      noise: 0.15
+        color1: { r: 40, g: 25, b: 118 },
+        color2: { r: 241, g: 96, b: 59 },
+        color3: { r: 255, g: 255, b: 255 },
+        speed: 0.4,
+        scale: 1.2,
+        type: 'animated',
+        noise: 0.1,
     }}
   />
 
