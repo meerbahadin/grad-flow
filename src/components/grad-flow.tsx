@@ -219,7 +219,7 @@ export const fragmentShader = `
     return mix(finalColor, originalPattern * finalColor, 0.3);
   }
 
-  //@Main
+  // @Main
   void main() {
     vec2 uv = vUv;
     float time = u_time * u_speed;
