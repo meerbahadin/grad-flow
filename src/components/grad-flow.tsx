@@ -23,11 +23,10 @@ export type GradientConfig = {
 
 export type GradientType =
   | 'linear'
-  | 'radial'
-  | 'diagonal'
   | 'animated'
   | 'conic'
   | 'wave'
+  | 'algorithmic'
 
 export type GradFlowProps = {
   config?: Partial<GradientConfig>
@@ -59,45 +58,25 @@ export const fragmentShader = `
   uniform float u_scale;
   uniform int u_type;
   uniform float u_noise;
+  uniform vec2 u_resolution;
 
   varying vec2 vUv;
 
   #define PI 3.14159265359
 
-  // --------------------
-  // Utility
-  // --------------------
+
+  // @Utility
   float noise(vec2 st) {
     return fract(sin(dot(st, vec2(12.9898, 78.233))) * 43758.5453);
   }
 
-  // --------------------
-  // Gradient Types
-  // --------------------
+  // @Gradient Types
   vec3 linearGradient(vec2 uv, float time) {
     float t = (uv.y * u_scale) + sin(uv.x * PI + time) * 0.1;
     t = clamp(t, 0.0, 1.0);
 
     return t < 0.5
       ? mix(u_color1, u_color2, t * 2.0)
-      : mix(u_color2, u_color3, (t - 0.5) * 2.0);
-  }
-
-  vec3 radialGradient(vec2 uv, float time) {
-    vec2 center = vec2(0.5);
-    float dist = length(uv - center) * u_scale + sin(time) * 0.1;
-
-    return dist < 0.5
-      ? mix(u_color1, u_color2, dist * 2.0)
-      : mix(u_color2, u_color3, clamp((dist - 0.5) * 2.0, 0.0, 1.0));
-  }
-
-  vec3 diagonalGradient(vec2 uv, float time) {
-    float t = ((uv.x + uv.y) * 0.5 * u_scale) + sin(time) * 0.05;
-    t = clamp(t, 0.0, 1.0);
-
-    return t < 0.5
-      ? mix(u_color1, u_color2, t * 2.0) 
       : mix(u_color2, u_color3, (t - 0.5) * 2.0);
   }
 
@@ -126,17 +105,53 @@ export const fragmentShader = `
     return color;
   }
 
+  #define S(a,b,t) smoothstep(a,b,t)
+  
+  mat2 Rot(float a) {
+    float s = sin(a);
+    float c = cos(a);
+    return mat2(c, -s, s, c);
+  }
+
+  vec2 hash(vec2 p) {
+    p = vec2(dot(p, vec2(2127.1, 81.17)), dot(p, vec2(1269.5, 283.37)));
+    return fract(sin(p) * 43758.5453);
+  }
+
+  float advancedNoise(in vec2 p) {
+    vec2 i = floor(p);
+    vec2 f = fract(p);
+    
+    vec2 u = f * f * (3.0 - 2.0 * f);
+    float n = mix(mix(dot(-1.0 + 2.0 * hash(i + vec2(0.0, 0.0)), f - vec2(0.0, 0.0)), 
+                      dot(-1.0 + 2.0 * hash(i + vec2(1.0, 0.0)), f - vec2(1.0, 0.0)), u.x),
+                  mix(dot(-1.0 + 2.0 * hash(i + vec2(0.0, 1.0)), f - vec2(0.0, 1.0)), 
+                      dot(-1.0 + 2.0 * hash(i + vec2(1.0, 1.0)), f - vec2(1.0, 1.0)), u.x), u.y);
+    return 0.5 + 0.5 * n;
+  }
+
   vec3 animatedGradient(vec2 uv, float time) {
-    vec2 pos = uv * u_scale + vec2(sin(time), cos(time * 0.7)) * 0.2;
-
-    float n1 = sin(pos.x * 3.0 + time) * sin(pos.y * 2.5 + time * 1.1);
-    float n2 = cos(pos.x * 2.0 + time * 0.8) * cos(pos.y * 3.5 + time * 0.6);
-    float blend = (n1 + n2) * 0.5 + 0.5;
-
-    vec3 col1 = mix(u_color1, u_color2, blend);
-    vec3 col2 = mix(u_color2, u_color3, sin(blend * PI + time) * 0.5 + 0.5);
-
-    return mix(col1, col2, uv.y);
+    float ratio = u_resolution.x / u_resolution.y;
+    vec2 tuv = uv;
+    tuv -= 0.5;
+    
+    float degree = advancedNoise(vec2(time * 0.1 * u_speed, tuv.x * tuv.y));
+    tuv.y *= 1.0 / ratio;
+    tuv *= Rot(radians((degree - 0.5) * 720.0 * u_scale + 180.0));
+    tuv.y *= ratio;
+    
+    float frequency = 5.0 * u_scale;
+    float amplitude = 30.0;
+    float speed = time * 2.0 * u_speed;
+    tuv.x += sin(tuv.y * frequency + speed) / amplitude;
+    tuv.y += sin(tuv.x * frequency * 1.5 + speed) / (amplitude * 0.5);
+    
+    vec3 layer1 = mix(u_color1, u_color2, S(-0.3, 0.2, (tuv * Rot(radians(-5.0))).x));
+    vec3 layer2 = mix(u_color2, u_color3, S(-0.3, 0.2, (tuv * Rot(radians(-5.0))).x));
+    
+    vec3 finalComp = mix(layer1, layer2, S(0.05, -0.2, tuv.y));
+    
+    return finalComp;
   }
 
   vec3 waveGradient(vec2 uv, float time) {
@@ -168,9 +183,43 @@ export const fragmentShader = `
     return clamp(color, 0.0, 1.0);
   }
 
-  // --------------------
-  // Main
-  // --------------------
+  vec3 algorithmicGradient(vec2 uv, float time) {
+    float mr = min(u_resolution.x, u_resolution.y);
+    vec2 fragCoord = uv * u_resolution;
+    vec2 centeredUv = (fragCoord * 2.0 - u_resolution.xy) / mr;
+    
+    centeredUv *= u_scale;
+    
+    float d = -time * u_speed * 0.5;
+    float a = 0.0;
+    
+    for (float i = 0.0; i < 8.0; ++i) {
+        a += cos(i - d - a * centeredUv.x);
+        d += sin(centeredUv.y * i + a);
+    }
+    
+    d += time * u_speed * 0.5;
+    
+    vec3 patterns = vec3(
+      cos(centeredUv.x * d + a) * 0.5 + 0.5,
+      cos(centeredUv.y * a + d) * 0.5 + 0.5,
+      cos((centeredUv.x + centeredUv.y) * (d + a) * 0.5) * 0.5 + 0.5
+    );
+    
+    vec3 color1Mix = mix(u_color1, u_color2, patterns.x);
+    vec3 color2Mix = mix(u_color2, u_color3, patterns.y);
+    vec3 color3Mix = mix(u_color3, u_color1, patterns.z);
+    
+    vec3 finalColor = mix(color1Mix, color2Mix, patterns.z);
+    finalColor = mix(finalColor, color3Mix, patterns.x * 0.5);
+    
+    vec3 originalPattern = vec3(cos(centeredUv * vec2(d, a)) * 0.6 + 0.4, cos(a + d) * 0.5 + 0.5);
+    originalPattern = cos(originalPattern * cos(vec3(d, a, 2.5)) * 0.5 + 0.5);
+    
+    return mix(finalColor, originalPattern * finalColor, 0.3);
+  }
+
+  //@Main
   void main() {
     vec2 uv = vUv;
     float time = u_time * u_speed;
@@ -179,15 +228,13 @@ export const fragmentShader = `
     if (u_type == 0) {
       color = linearGradient(uv, time);
     } else if (u_type == 1) {
-      color = radialGradient(uv, time);
-    } else if (u_type == 2) {
-      color = diagonalGradient(uv, time);
-    } else if (u_type == 3) {
       color = conicGradient(uv, time);
-    } else if (u_type == 4) {
+    } else if (u_type == 2) {
       color = animatedGradient(uv, time);
-    } else {
+    } else if (u_type == 3) {
       color = waveGradient(uv, time);
+    } else {
+      color = algorithmicGradient(uv, time);
     }
 
     if (u_noise > 0.001) {
@@ -199,29 +246,28 @@ export const fragmentShader = `
   }
 `
 
-const DEFAULT_CONFIG: GradientConfig = {
-  color1: { r: 107, g: 85, b: 216 },
+export const DEFAULT_CONFIG: GradientConfig = {
+  color1: { r: 40, g: 25, b: 118 },
   color2: { r: 241, g: 96, b: 59 },
   color3: { r: 255, g: 255, b: 255 },
-  speed: 0.6,
+  speed: 0.4,
   scale: 1.2,
   type: 'animated',
   noise: 0.1,
 }
 
-const normalizeRgb = (rgb: RGB): [number, number, number] => [
+export const normalizeRgb = (rgb: RGB): [number, number, number] => [
   rgb.r / 255,
   rgb.g / 255,
   rgb.b / 255,
 ]
 
-const gradientTypeNumber = {
+export const gradientTypeNumber = {
   linear: 0,
-  radial: 1,
-  diagonal: 2,
-  conic: 3,
-  animated: 4,
-  wave: 5,
+  conic: 1,
+  animated: 2,
+  wave: 3,
+  algorithmic: 4,
 }
 
 export default function GradFlow({
@@ -263,26 +309,6 @@ export default function GradFlow({
     const gl = renderer.gl
     const plane = new Plane(gl, { width: 2, height: 2 })
 
-    const program = new Program(gl, {
-      vertex: vertexShader,
-      fragment: fragmentShader,
-      uniforms: {
-        u_time: { value: 0 },
-        u_color1: { value: normalizedColors.color1 },
-        u_color2: { value: normalizedColors.color2 },
-        u_color3: { value: normalizedColors.color3 },
-        u_speed: { value: config.speed },
-        u_scale: { value: config.scale },
-        u_type: { value: gradientTypeNumber[config.type ?? 'animated'] },
-        u_noise: { value: config.noise },
-      },
-    })
-    programRef.current = program
-
-    const mesh = new Mesh(gl, { geometry: plane, program })
-    const scene = new Transform()
-    mesh.setParent(scene)
-
     const handleResize = () => {
       if (!canvas.parentElement) return
 
@@ -297,7 +323,32 @@ export default function GradFlow({
       canvas.style.height = h + 'px'
 
       renderer.setSize(w, h)
+
+      if (programRef.current) {
+        programRef.current.uniforms.u_resolution.value = [w, h]
+      }
     }
+
+    const program = new Program(gl, {
+      vertex: vertexShader,
+      fragment: fragmentShader,
+      uniforms: {
+        u_time: { value: 0 },
+        u_color1: { value: normalizedColors.color1 },
+        u_color2: { value: normalizedColors.color2 },
+        u_color3: { value: normalizedColors.color3 },
+        u_speed: { value: config.speed },
+        u_scale: { value: config.scale },
+        u_type: { value: gradientTypeNumber[config.type ?? 'animated'] },
+        u_noise: { value: config.noise },
+        u_resolution: { value: [canvas.clientWidth, canvas.clientHeight] },
+      },
+    })
+    programRef.current = program
+
+    const mesh = new Mesh(gl, { geometry: plane, program })
+    const scene = new Transform()
+    mesh.setParent(scene)
 
     handleResize()
     window.addEventListener('resize', handleResize, { passive: true })

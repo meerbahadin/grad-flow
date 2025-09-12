@@ -18,10 +18,13 @@ import { Slider } from './ui/slider'
 
 import { cn } from '@/lib/utils'
 import {
+  DEFAULT_CONFIG,
   fragmentShader,
   GradFlowProps,
   GradientConfig,
   GradientType,
+  gradientTypeNumber,
+  normalizeRgb,
   RGB,
   vertexShader,
 } from './grad-flow'
@@ -29,16 +32,6 @@ import {
 import ContentDemo from './content-demo'
 import { Code, ImageDown, Settings, Wand } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
-
-const DEFAULT_CONFIG: GradientConfig = {
-  color1: { r: 107, g: 85, b: 216 },
-  color2: { r: 241, g: 96, b: 59 },
-  color3: { r: 255, g: 255, b: 255 },
-  speed: 0.6,
-  scale: 1.2,
-  type: 'animated',
-  noise: 0.15,
-}
 
 const PRESETS = {
   purple: {
@@ -86,13 +79,25 @@ const PRESETS = {
     type: 'wave',
     noise: 0.15,
   },
+  psychedelic: {
+    color1: { r: 255, g: 20, b: 147 },
+    color2: { r: 0, g: 255, b: 255 },
+    color3: { r: 255, g: 255, b: 0 },
+    speed: 1.2,
+    scale: 1.2,
+    type: 'algorithmic',
+    noise: 0.05,
+  },
+  abstract: {
+    color1: { r: 138, g: 43, b: 226 },
+    color2: { r: 30, g: 144, b: 255 },
+    color3: { r: 255, g: 105, b: 180 },
+    speed: 0.8,
+    scale: 0.5,
+    type: 'algorithmic',
+    noise: 0.1,
+  },
 } as const
-
-const normalizeRgb = (rgb: RGB): [number, number, number] => [
-  rgb.r / 255,
-  rgb.g / 255,
-  rgb.b / 255,
-]
 
 const rgbToHex = (rgb: RGB): string =>
   '#' +
@@ -113,15 +118,6 @@ const hexToRgb = (hex: string): RGB => {
     g: parseInt(h.slice(2, 4), 16),
     b: parseInt(h.slice(4, 6), 16),
   }
-}
-
-const gradientTypeNumber = {
-  linear: 0,
-  radial: 1,
-  diagonal: 2,
-  conic: 3,
-  animated: 4,
-  wave: 5,
 }
 
 const captureImage = (
@@ -238,29 +234,6 @@ export default function GradFlowDemo({
     const gl = renderer.gl
     const plane = new Plane(gl, { width: 2, height: 2 })
 
-    const program = new Program(gl, {
-      vertex: vertexShader,
-      fragment: fragmentShader,
-      uniforms: {
-        u_time: { value: 0 },
-        u_color1: { value: normalizedColors.color1 },
-        u_color2: { value: normalizedColors.color2 },
-        u_color3: { value: normalizedColors.color3 },
-        u_speed: { value: config.speed },
-        u_scale: { value: config.scale },
-        u_type: { value: gradientTypeNumber[config.type] },
-        u_noise: { value: config.noise },
-      },
-    })
-    programRef.current = program
-
-    const mesh = new Mesh(gl, { geometry: plane, program })
-    meshRef.current = mesh
-
-    const scene = new Transform()
-    sceneRef.current = scene
-    mesh.setParent(scene)
-
     const handleResize = () => {
       if (!canvas.parentElement) return
 
@@ -275,7 +248,36 @@ export default function GradFlowDemo({
       canvas.style.height = h + 'px'
 
       renderer.setSize(w, h)
+
+      // Update resolution uniform if program exists
+      if (programRef.current) {
+        programRef.current.uniforms.u_resolution.value = [w, h]
+      }
     }
+
+    const program = new Program(gl, {
+      vertex: vertexShader,
+      fragment: fragmentShader,
+      uniforms: {
+        u_time: { value: 0 },
+        u_color1: { value: normalizedColors.color1 },
+        u_color2: { value: normalizedColors.color2 },
+        u_color3: { value: normalizedColors.color3 },
+        u_speed: { value: config.speed },
+        u_scale: { value: config.scale },
+        u_type: { value: gradientTypeNumber[config.type] },
+        u_noise: { value: config.noise },
+        u_resolution: { value: [canvas.clientWidth, canvas.clientHeight] },
+      },
+    })
+    programRef.current = program
+
+    const mesh = new Mesh(gl, { geometry: plane, program })
+    meshRef.current = mesh
+
+    const scene = new Transform()
+    sceneRef.current = scene
+    mesh.setParent(scene)
 
     handleResize()
     window.addEventListener('resize', handleResize, { passive: true })
@@ -373,11 +375,10 @@ export default function GradFlowDemo({
                     <SelectGroup>
                       <SelectLabel>Type</SelectLabel>
                       <SelectItem value='linear'>Linear</SelectItem>
-                      <SelectItem value='radial'>Radial</SelectItem>
-                      <SelectItem value='diagonal'>Diagonal</SelectItem>
                       <SelectItem value='conic'>Conic</SelectItem>
                       <SelectItem value='animated'>Animated</SelectItem>
                       <SelectItem value='wave'>Wave</SelectItem>
+                      <SelectItem value='algorithmic'>Algorithmic</SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>
