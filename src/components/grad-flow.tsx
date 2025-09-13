@@ -183,19 +183,21 @@ export const fragmentShader = `
     return clamp(color, 0.0, 1.0);
   }
 
-  vec3 algorithmicGradient(vec2 uv, float time) {
+ vec3 algorithmicGradient(vec2 uv, float time) {
     float mr = min(u_resolution.x, u_resolution.y);
     vec2 fragCoord = uv * u_resolution;
     vec2 centeredUv = (fragCoord * 2.0 - u_resolution.xy) / mr;
     
     centeredUv *= u_scale;
     
+    float dampening = 1.0 / (1.0 + u_scale * 0.1);
+    
     float d = -time * u_speed * 0.5;
     float a = 0.0;
     
     for (float i = 0.0; i < 8.0; ++i) {
-        a += cos(i - d - a * centeredUv.x);
-        d += sin(centeredUv.y * i + a);
+        a += cos(i - d - a * centeredUv.x) * dampening;
+        d += sin(centeredUv.y * i + a) * dampening;
     }
     
     d += time * u_speed * 0.5;
