@@ -85,7 +85,7 @@ const PRESETS = {
     color3: { r: 255, g: 255, b: 0 },
     speed: 1.2,
     scale: 1.2,
-    type: 'algorithmic',
+    type: 'silk',
     noise: 0.05,
   },
   abstract: {
@@ -94,7 +94,7 @@ const PRESETS = {
     color3: { r: 255, g: 105, b: 180 },
     speed: 0.8,
     scale: 0.5,
-    type: 'algorithmic',
+    type: 'silk',
     noise: 0.1,
   },
 } as const
@@ -378,42 +378,37 @@ export default function GradFlowDemo({
                       <SelectItem value='conic'>Conic</SelectItem>
                       <SelectItem value='animated'>Animated</SelectItem>
                       <SelectItem value='wave'>Wave</SelectItem>
-                      <SelectItem value='algorithmic'>Algorithmic</SelectItem>
+                      <SelectItem value='silk'>Silk</SelectItem>
+                      <SelectItem value='smoke'>Smoke</SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>
 
                 <div className='space-y-2'>
-                  {(['color1', 'color2', 'color3'] as const).map(
-                    (colorKey, idx) => (
-                      <div
-                        key={colorKey}
-                        className='flex items-center space-x-3'
-                      >
-                        <label className='text-xs w-12'>Color {idx + 1}</label>
-                        <input
-                          type='color'
-                          value={rgbToHex(config[colorKey])}
-                          onChange={(e) =>
-                            updateConfig({
-                              [colorKey]: hexToRgb(e.target.value),
-                            })
-                          }
-                          className='w-10 h-6 rounded border cursor-pointer'
-                        />
-                        <input
-                          type='text'
-                          value={rgbToHex(config[colorKey])}
-                          onChange={(e) =>
-                            updateConfig({
-                              [colorKey]: hexToRgb(e.target.value),
-                            })
-                          }
-                          className='flex-1 border rounded px-2 py-1 text-xs'
-                        />
-                      </div>
-                    )
-                  )}
+                  {(['color1', 'color2', 'color3'] as const).map((colorKey) => (
+                    <div key={colorKey} className='flex items-center space-x-3'>
+                      <input
+                        type='color'
+                        value={rgbToHex(config[colorKey])}
+                        onChange={(e) =>
+                          updateConfig({
+                            [colorKey]: hexToRgb(e.target.value),
+                          })
+                        }
+                        className='w-10 h-6 rounded border cursor-pointer'
+                      />
+                      <input
+                        type='text'
+                        value={rgbToHex(config[colorKey])}
+                        onChange={(e) =>
+                          updateConfig({
+                            [colorKey]: hexToRgb(e.target.value),
+                          })
+                        }
+                        className='flex-1 border rounded px-2 py-1 text-xs'
+                      />
+                    </div>
+                  ))}
                 </div>
 
                 <div>

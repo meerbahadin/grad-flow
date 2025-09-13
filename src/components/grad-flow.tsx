@@ -26,7 +26,8 @@ export type GradientType =
   | 'animated'
   | 'conic'
   | 'wave'
-  | 'algorithmic'
+  | 'silk'
+  | 'smoke'
 
 export type GradFlowProps = {
   config?: Partial<GradientConfig>
@@ -183,7 +184,7 @@ export const fragmentShader = `
     return clamp(color, 0.0, 1.0);
   }
 
- vec3 algorithmicGradient(vec2 uv, float time) {
+  vec3 silkGradient(vec2 uv, float time) {
     float mr = min(u_resolution.x, u_resolution.y);
     vec2 fragCoord = uv * u_resolution;
     vec2 centeredUv = (fragCoord * 2.0 - u_resolution.xy) / mr;
@@ -221,6 +222,39 @@ export const fragmentShader = `
     return mix(finalColor, originalPattern * finalColor, 0.3);
   }
 
+  vec3 smokeGradient(vec2 uv, float time) {
+    float mr = min(u_resolution.x, u_resolution.y);
+    vec2 fragCoord = uv * u_resolution;
+    vec2 p = (2.0 * fragCoord.xy - u_resolution.xy) / mr;
+    
+    p *= u_scale;
+    
+    float iTime = time * u_speed;
+    
+    for(int i = 1; i < 10; i++) {
+      vec2 newp = p;
+      float fi = float(i);
+      newp.x += 0.6 / fi * sin(fi * p.y + iTime + 0.3 * fi) + 1.0;
+      newp.y += 0.6 / fi * sin(fi * p.x + iTime + 0.3 * (fi + 10.0)) - 1.4;
+      p = newp;
+    }
+    
+    float redPattern = 1.0;                          
+    float greenPattern = 1.0 - sin(p.y);             
+    float bluePattern = sin(p.x + p.y);             
+    
+    greenPattern = clamp(greenPattern, 0.0, 1.0);
+    bluePattern = bluePattern * 0.5 + 0.5;
+    
+    vec3 color;
+    
+    vec3 color12 = mix(u_color1, u_color2, greenPattern);
+    
+    color = mix(color12, u_color3, bluePattern);
+    
+    return clamp(color, 0.0, 1.0);
+  }
+
   // @Main
   void main() {
     vec2 uv = vUv;
@@ -235,8 +269,12 @@ export const fragmentShader = `
       color = animatedGradient(uv, time);
     } else if (u_type == 3) {
       color = waveGradient(uv, time);
+    } else if (u_type == 4) {
+      color = silkGradient(uv, time);
+    } else if (u_type == 5) {
+      color = smokeGradient(uv, time);
     } else {
-      color = algorithmicGradient(uv, time);
+      color = animatedGradient(uv, time);
     }
 
     if (u_noise > 0.001) {
@@ -269,7 +307,8 @@ export const gradientTypeNumber = {
   conic: 1,
   animated: 2,
   wave: 3,
-  algorithmic: 4,
+  silk: 4,
+  smoke: 5,
 }
 
 export default function GradFlow({
