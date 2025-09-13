@@ -349,7 +349,7 @@ export default function GradFlowDemo({
   return (
     <div className='h-screen w-full flex flex-col items-center justify-between relative py-2 rounded-3xl'>
       <div className='flex w-full max-w-md z-50 container'>
-        <div className='flex justify-between items-center w-full p-3 bg-gradient-to-tr from-background to-transparent outline-1 outline-offset-2 outline-white/15 rounded-lg backdrop-blur-lg'>
+        <div className='dark flex justify-between items-center w-full p-3 bg-gradient-to-tr from-background/30 to-transparent outline-1 outline-offset-2 outline-white/15 rounded-lg backdrop-blur-lg'>
           <Wand />
           <div className='relative'>
             <Popover>

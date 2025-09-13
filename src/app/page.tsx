@@ -19,7 +19,7 @@ export default function Home() {
         <div className='space-y-4'>
           <div className='space-y-2'>
             <h1 className='text-2xl capitalize'>Installation</h1>
-            <p className='text-zinc-600'>
+            <p className='text-zinc-400'>
               Install the required dependencies first, then copy the component
               code below. GradFlow requires the OGL library.
             </p>
@@ -39,7 +39,7 @@ export default function Home() {
         <div className='space-y-4'>
           <div className='space-y-2'>
             <h1 className='text-lg'>Utils</h1>
-            <p className='text-zinc-600 text-sm'>
+            <p className='text-zinc-400 text-sm'>
               Create a utility function for merging Tailwind CSS classes.
             </p>
           </div>
@@ -57,13 +57,13 @@ export function cn(...inputs: ClassValue[]) {
         <div className='space-y-4'>
           <div className='space-y-2'>
             <h1 className='text-lg'>Usage</h1>
-            <p className='text-zinc-600 text-sm'>
+            <p className='text-zinc-400 text-sm'>
               Configure your gradient background with custom colors, animation
               speed, scale, and noise settings. The component offers full
               control over the visual appearance and behavior of your animated
               gradients.
             </p>
-            <p className='text-zinc-600 text-sm mt-2'>
+            <p className='text-zinc-400 text-sm mt-2'>
               Example as a full screen background:
             </p>
           </div>
@@ -94,7 +94,7 @@ export function cn(...inputs: ClassValue[]) {
               width={28}
               height={28}
               alt='Meera Dev Logo'
-              className='w-8 h-8 mask-t-from-40% invert-100'
+              className='w-8 h-8 mask-t-from-40%'
             />
           </Link>
 

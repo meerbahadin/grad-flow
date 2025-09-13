@@ -261,6 +261,7 @@ export const fragmentShader = `
     float time = u_time * u_speed;
 
     vec3 color;
+    
     if (u_type == 0) {
       color = linearGradient(uv, time);
     } else if (u_type == 1) {
