@@ -293,7 +293,7 @@ export const DEFAULT_CONFIG: GradientConfig = {
   color3: { r: 255, g: 255, b: 255 },
   speed: 0.4,
   scale: 1.2,
-  type: 'silk',
+  type: 'animated',
   noise: 0.1,
 }
 
