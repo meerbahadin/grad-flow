@@ -185,9 +185,9 @@ export const fragmentShader = `
   }
 
   vec3 silkGradient(vec2 uv, float time) {
-    float mr = min(u_resolution.x, u_resolution.y);
     vec2 fragCoord = uv * u_resolution;
-    vec2 centeredUv = (fragCoord * 2.0 - u_resolution.xy) / mr;
+    vec2 invResolution = 1.0 / u_resolution.xy;
+    vec2 centeredUv = (fragCoord * 2.0 - u_resolution.xy) * invResolution;
     
     centeredUv *= u_scale;
     
@@ -221,7 +221,7 @@ export const fragmentShader = `
     
     return mix(finalColor, originalPattern * finalColor, 0.3);
   }
-
+    
   vec3 smokeGradient(vec2 uv, float time) {
     float mr = min(u_resolution.x, u_resolution.y);
     vec2 fragCoord = uv * u_resolution;
@@ -293,7 +293,7 @@ export const DEFAULT_CONFIG: GradientConfig = {
   color3: { r: 255, g: 255, b: 255 },
   speed: 0.4,
   scale: 1.2,
-  type: 'animated',
+  type: 'silk',
   noise: 0.1,
 }
 
