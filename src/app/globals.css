@@ -120,11 +120,14 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+    scrollbar-color: var(--scrollbar-color) transparent;
   }
 
   :root {
-    --scrollbar-color: rgba(0, 0, 0, 0.3);
+    --scrollbar-color: rgba(129, 129, 129, 0.3);
 
+    /* Thanks for motion primitives website for the code preview theme */
     /* shiki theme noir */
     --shiki-foreground: #ffffff;
     --shiki-token-constant: #a7a7a7;
@@ -132,7 +135,7 @@
     --shiki-token-comment: #666666;
     --shiki-token-keyword: #a7a7a7;
     --shiki-token-parameter: #a7a7a7;
-    --shiki-token-function: #ffffff;
+    --shiki-token-function: #46e2b1;
     --shiki-token-string-expression: #a7a7a7;
     --shiki-token-punctuation: #a7a7a7;
     --shiki-token-link: #a7a7a7;

@@ -410,8 +410,14 @@ export default function GradFlow({
       cancelAnimationFrame(rafRef.current)
       window.removeEventListener('resize', handleResize)
 
-      const loseContext = gl.getExtension('WEBGL_lose_context')
-      loseContext?.loseContext()
+      const gl = rendererRef.current?.gl
+
+      if (programRef.current?.program && gl) {
+        gl.deleteProgram(programRef.current.program)
+      }
+
+      rendererRef.current = null
+      programRef.current = null
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps

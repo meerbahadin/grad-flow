@@ -30,72 +30,82 @@ import {
 } from './grad-flow'
 
 import ContentDemo from './content-demo'
-import { Code, ImageDown, Settings, Wand } from 'lucide-react'
+import { Code, ImageDown, Settings } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
+import Image from 'next/image'
 
 const PRESETS = {
-  purple: {
-    color1: { r: 102, g: 126, b: 234 },
-    color2: { r: 118, g: 75, b: 162 },
-    color3: { r: 240, g: 147, b: 251 },
-    noise: 0.1,
-  },
-  sunset: {
-    color1: { r: 255, g: 236, b: 210 },
-    color2: { r: 252, g: 182, b: 159 },
-    color3: { r: 255, g: 138, b: 128 },
-    noise: 0.05,
-  },
-  pastel: {
-    color1: { r: 168, g: 237, b: 234 },
-    color2: { r: 254, g: 214, b: 227 },
-    color3: { r: 210, g: 153, b: 194 },
-    noise: 0.02,
-  },
-  modern: {
-    color1: { r: 255, g: 255, b: 255 },
-    color2: { r: 241, g: 96, b: 59 },
-    color3: { r: 22, g: 87, b: 218 },
-    speed: 0.6,
-    scale: 1,
-    type: 'conic',
-    noise: 0.1,
-  },
-  ocean: {
-    color1: { r: 207, g: 229, b: 242 },
-    color2: { r: 0, g: 180, b: 216 },
-    color3: { r: 144, g: 224, b: 239 },
-    speed: 0.8,
-    scale: 1,
-    type: 'wave',
-    noise: 0.08,
-  },
-  frequency: {
-    color1: { r: 255, g: 255, b: 255 },
-    color2: { r: 255, g: 100, b: 61 },
-    color3: { r: 71, g: 29, b: 114 },
-    speed: 0.6,
-    scale: 1.0,
-    type: 'wave',
-    noise: 0.15,
-  },
-  psychedelic: {
-    color1: { r: 255, g: 20, b: 147 },
-    color2: { r: 0, g: 255, b: 255 },
-    color3: { r: 255, g: 255, b: 0 },
-    speed: 1.2,
+  cosmic: {
+    color1: { r: 85, g: 4, b: 129 },
+    color2: { r: 0, g: 145, b: 255 },
+    color3: { r: 0, g: 4, b: 5 },
+    speed: 0.4,
     scale: 1.2,
     type: 'silk',
-    noise: 0.05,
+    noise: 0.1,
   },
-  abstract: {
-    color1: { r: 138, g: 43, b: 226 },
-    color2: { r: 30, g: 144, b: 255 },
-    color3: { r: 255, g: 105, b: 180 },
+  matrix: {
+    color1: { r: 34, g: 54, b: 145 },
+    color2: { r: 0, g: 0, b: 0 },
+    color3: { r: 147, g: 251, b: 173 },
     speed: 0.8,
-    scale: 0.5,
+    scale: 1,
     type: 'silk',
     noise: 0.1,
+  },
+  electric: {
+    color1: { r: 5, g: 65, b: 245 },
+    color2: { r: 178, g: 224, b: 209 },
+    color3: { r: 87, g: 229, b: 149 },
+    speed: 0.9,
+    scale: 2,
+    type: 'animated',
+    noise: 0.18,
+  },
+  inferno: {
+    color1: { r: 77, g: 0, b: 0 },
+    color2: { r: 0, g: 0, b: 0 },
+    color3: { r: 255, g: 187, b: 0 },
+    speed: 0.9,
+    scale: 1.1,
+    type: 'wave',
+    noise: 0.18,
+  },
+  mystic: {
+    color1: { r: 192, g: 155, b: 197 },
+    color2: { r: 0, g: 0, b: 0 },
+    color3: { r: 53, g: 0, b: 97 },
+    speed: 0.9,
+    scale: 2,
+    type: 'smoke',
+    noise: 0.18,
+  },
+  cyber: {
+    color1: { r: 102, g: 237, b: 255 },
+    color2: { r: 0, g: 0, b: 0 },
+    color3: { r: 0, g: 255, b: 110 },
+    speed: 0.9,
+    scale: 2,
+    type: 'silk',
+    noise: 0.18,
+  },
+  neon: {
+    color1: { r: 102, g: 237, b: 255 },
+    color2: { r: 0, g: 0, b: 0 },
+    color3: { r: 0, g: 255, b: 110 },
+    speed: 0.6,
+    scale: 2,
+    type: 'animated',
+    noise: 0.18,
+  },
+  plasma: {
+    color1: { r: 163, g: 106, b: 242 },
+    color2: { r: 0, g: 0, b: 0 },
+    color3: { r: 234, g: 130, b: 106 },
+    speed: 0.6,
+    scale: 1.2,
+    type: 'silk',
+    noise: 0.18,
   },
 } as const
 
@@ -349,8 +359,8 @@ export default function GradFlowDemo({
   return (
     <div className='h-screen w-full flex flex-col items-center justify-between relative py-2 rounded-3xl'>
       <div className='flex w-full max-w-md z-50 container'>
-        <div className='dark flex justify-between items-center w-full p-3  outline-1 outline-offset-2 outline-white/25 rounded-lg backdrop-blur-lg'>
-          <Wand />
+        <div className='dark flex justify-between items-center w-full p-3 bg-white/20  outline-1 outline-offset-2 outline-white/25 rounded-lg backdrop-blur-lg'>
+          <Image width={30} height={30} src='/logo.svg' alt='logo' />
           <div className='relative'>
             <Popover>
               <PopoverTrigger asChild>
