@@ -288,13 +288,13 @@ export const fragmentShader = `
 `
 
 export const DEFAULT_CONFIG: GradientConfig = {
-  color1: { r: 40, g: 25, b: 118 },
-  color2: { r: 241, g: 96, b: 59 },
-  color3: { r: 255, g: 255, b: 255 },
-  speed: 0.4,
-  scale: 1.2,
+  color1: { r: 226, g: 75, b: 120 },
+  color2: { r: 251, g: 230, b: 228 },
+  color3: { r: 90, g: 0, b: 224 },
+  speed: 0.8,
+  scale: 1,
   type: 'animated',
-  noise: 0.1,
+  noise: 0.08,
 }
 
 export const normalizeRgb = (rgb: RGB): [number, number, number] => [
