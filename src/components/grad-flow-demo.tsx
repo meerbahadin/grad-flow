@@ -390,6 +390,7 @@ export default function GradFlowDemo({
                       <SelectItem value='wave'>Wave</SelectItem>
                       <SelectItem value='silk'>Silk</SelectItem>
                       <SelectItem value='smoke'>Smoke</SelectItem>
+                      <SelectItem value='stripe'>Stripe</SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>

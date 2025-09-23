@@ -28,6 +28,7 @@ export type GradientType =
   | 'wave'
   | 'silk'
   | 'smoke'
+  | 'stripe'
 
 export type GradFlowProps = {
   config?: Partial<GradientConfig>
@@ -255,6 +256,20 @@ export const fragmentShader = `
     return clamp(color, 0.0, 1.0);
   }
 
+  vec3 stripeGradient(vec2 uv, float time) {
+    vec2 p = ((uv * u_resolution * 2.0 - u_resolution.xy) / (u_resolution.x + u_resolution.y) * 2.0) * u_scale;
+    float t = time * 0.7, a = 4.0 * p.y - sin(-p.x * 3.0 + p.y - t);
+    a = smoothstep(cos(a) * 0.7, sin(a) * 0.7 + 1.0, cos(a - 4.0 * p.y) - sin(a + 3.0 * p.x));
+
+    vec2 warped = (cos(a) * p + sin(a) * vec2(-p.y, p.x)) * 0.5 + 0.5;
+    vec3 color = mix(u_color1, u_color2, warped.x);
+    
+    color = mix(color, u_color3, warped.y);
+    color *= color + 0.6 * sqrt(color);
+
+    return clamp(color, 0.0, 1.0);
+  }
+
   // @Main
   void main() {
     vec2 uv = vUv;
@@ -274,6 +289,8 @@ export const fragmentShader = `
       color = silkGradient(uv, time);
     } else if (u_type == 5) {
       color = smokeGradient(uv, time);
+    } else if (u_type == 6) {
+      color = stripeGradient(uv, time);
     } else {
       color = animatedGradient(uv, time);
     }
@@ -310,6 +327,7 @@ export const gradientTypeNumber = {
   wave: 3,
   silk: 4,
   smoke: 5,
+  stripe: 6,
 }
 
 export default function GradFlow({
