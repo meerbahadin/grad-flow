@@ -305,12 +305,12 @@ export const fragmentShader = `
 `
 
 export const DEFAULT_CONFIG: GradientConfig = {
-  color1: { r: 226, g: 75, b: 120 },
-  color2: { r: 251, g: 230, b: 228 },
-  color3: { r: 90, g: 0, b: 224 },
-  speed: 0.8,
+  color1: { r: 226, g: 98, b: 75 },
+  color2: { r: 255, g: 255, b: 255 },
+  color3: { r: 30, g: 34, b: 159 },
+  speed: 0.4,
   scale: 1,
-  type: 'animated',
+  type: 'stripe',
   noise: 0.08,
 }
 
