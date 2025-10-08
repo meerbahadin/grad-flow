@@ -1,5 +1,6 @@
 'use client'
 
+import React from 'react'
 import {
   Select,
   SelectContent,
@@ -10,8 +11,10 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Slider } from '@/components/ui/slider'
+import { Button } from '@/components/ui/button'
 import { GradientConfig, GradientType } from '@/types/gradient'
 import { hexToRgb, rgbToHex } from '@/lib/color-utils'
+import { generateRandomColors, randomGradientType } from '@/lib/random-colors'
 
 interface GradientControlsProps {
   config: GradientConfig
@@ -19,6 +22,8 @@ interface GradientControlsProps {
 }
 
 export function GradientControls({ config, onConfigChange }: GradientControlsProps) {
+  const [randomizeType, setRandomizeType] = React.useState(true)
+
   return (
     <>
       <h3 className='font-semibold mb-3'>Gradient Controls</h3>
@@ -69,6 +74,34 @@ export function GradientControls({ config, onConfigChange }: GradientControlsPro
             />
           </div>
         ))}
+      </div>
+
+      <div className='space-y-2'>
+        <div className='flex items-center space-x-2'>
+          <input
+            type='checkbox'
+            id='randomize-type'
+            checked={randomizeType}
+            onChange={(e) => setRandomizeType(e.target.checked)}
+            className='w-4 h-4 cursor-pointer'
+          />
+          <label htmlFor='randomize-type' className='text-sm cursor-pointer'>
+            Randomize type
+          </label>
+        </div>
+        <Button
+          onClick={() => {
+            const randomConfig = generateRandomColors()
+            if (randomizeType) {
+              randomConfig.type = randomGradientType()
+            }
+            onConfigChange(randomConfig)
+          }}
+          className='w-full'
+          variant='outline'
+        >
+          Randomize
+        </Button>
       </div>
 
       <div>

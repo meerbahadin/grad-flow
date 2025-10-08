@@ -8,10 +8,9 @@ import { DEFAULT_CONFIG, PRESETS } from '@/constants/gradients'
 import { useWebGLRenderer } from '@/hooks/useWebGLRenderer'
 import { captureImage } from '@/lib/image-capture'
 import { copyCodeToClipboard } from '@/lib/clipboard'
-import { generateRandomColors as generateRandomGradient } from '@/lib/random-colors'
 import { normalizeColor } from '@/lib/color-conversion'
 import ContentDemo from './content-demo'
-import { Code, ImageDown, Settings, Shuffle } from 'lucide-react'
+import { Code, ImageDown, Settings } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import Image from 'next/image'
 import { GradientControls } from './demo/gradient-controls'
@@ -25,13 +24,19 @@ export default function GradFlowDemo({
     const normalized: GradientConfig = { ...DEFAULT_CONFIG }
 
     if (initialConfig) {
-      if (initialConfig.color1) normalized.color1 = normalizeColor(initialConfig.color1)
-      if (initialConfig.color2) normalized.color2 = normalizeColor(initialConfig.color2)
-      if (initialConfig.color3) normalized.color3 = normalizeColor(initialConfig.color3)
-      if (initialConfig.speed !== undefined) normalized.speed = initialConfig.speed
-      if (initialConfig.scale !== undefined) normalized.scale = initialConfig.scale
+      if (initialConfig.color1)
+        normalized.color1 = normalizeColor(initialConfig.color1)
+      if (initialConfig.color2)
+        normalized.color2 = normalizeColor(initialConfig.color2)
+      if (initialConfig.color3)
+        normalized.color3 = normalizeColor(initialConfig.color3)
+      if (initialConfig.speed !== undefined)
+        normalized.speed = initialConfig.speed
+      if (initialConfig.scale !== undefined)
+        normalized.scale = initialConfig.scale
       if (initialConfig.type) normalized.type = initialConfig.type
-      if (initialConfig.noise !== undefined) normalized.noise = initialConfig.noise
+      if (initialConfig.noise !== undefined)
+        normalized.noise = initialConfig.noise
     }
 
     return normalized
@@ -49,10 +54,6 @@ export default function GradFlowDemo({
 
   const applyPreset = useCallback((presetName: keyof typeof PRESETS) => {
     setConfig((prev) => ({ ...prev, ...PRESETS[presetName] }))
-  }, [])
-
-  const handleRandomize = useCallback(() => {
-    setConfig((prev) => ({ ...prev, ...generateRandomGradient() }))
   }, [])
 
   const handleCaptureImage = useCallback(() => {
@@ -96,14 +97,6 @@ export default function GradFlowDemo({
                   >
                     <Code />
                     copy
-                  </Button>
-                  <Button
-                    variant='outline'
-                    className='cursor-pointer'
-                    onClick={handleRandomize}
-                    title='Random Gradient'
-                  >
-                    <Shuffle />
                   </Button>
                   <Button
                     variant='outline'
