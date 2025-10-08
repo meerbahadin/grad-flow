@@ -1,0 +1,96 @@
+import { GradientConfig, GradientType } from '@/types/gradient'
+
+export const DEFAULT_CONFIG: GradientConfig = {
+  color1: { r: 226, g: 98, b: 75 },
+  color2: { r: 255, g: 255, b: 255 },
+  color3: { r: 30, g: 34, b: 159 },
+  speed: 0.4,
+  scale: 1,
+  type: 'stripe',
+  noise: 0.08,
+}
+
+export const GRADIENT_TYPE_NUMBER: Record<GradientType, number> = {
+  linear: 0,
+  conic: 1,
+  animated: 2,
+  wave: 3,
+  silk: 4,
+  smoke: 5,
+  stripe: 6,
+}
+
+export const PRESETS = {
+  cosmic: {
+    color1: { r: 85, g: 4, b: 129 },
+    color2: { r: 0, g: 145, b: 255 },
+    color3: { r: 0, g: 4, b: 5 },
+    speed: 0.4,
+    scale: 1.2,
+    type: 'silk' as GradientType,
+    noise: 0.1,
+  },
+  matrix: {
+    color1: { r: 34, g: 54, b: 145 },
+    color2: { r: 0, g: 0, b: 0 },
+    color3: { r: 147, g: 251, b: 173 },
+    speed: 0.8,
+    scale: 1,
+    type: 'silk' as GradientType,
+    noise: 0.1,
+  },
+  electric: {
+    color1: { r: 5, g: 65, b: 245 },
+    color2: { r: 178, g: 224, b: 209 },
+    color3: { r: 87, g: 229, b: 149 },
+    speed: 0.9,
+    scale: 2,
+    type: 'animated' as GradientType,
+    noise: 0.18,
+  },
+  inferno: {
+    color1: { r: 77, g: 0, b: 0 },
+    color2: { r: 0, g: 0, b: 0 },
+    color3: { r: 255, g: 187, b: 0 },
+    speed: 0.9,
+    scale: 1.1,
+    type: 'wave' as GradientType,
+    noise: 0.18,
+  },
+  mystic: {
+    color1: { r: 192, g: 155, b: 197 },
+    color2: { r: 0, g: 0, b: 0 },
+    color3: { r: 53, g: 0, b: 97 },
+    speed: 0.9,
+    scale: 2,
+    type: 'smoke' as GradientType,
+    noise: 0.18,
+  },
+  cyber: {
+    color1: { r: 102, g: 237, b: 255 },
+    color2: { r: 0, g: 0, b: 0 },
+    color3: { r: 0, g: 255, b: 110 },
+    speed: 0.9,
+    scale: 2,
+    type: 'silk' as GradientType,
+    noise: 0.18,
+  },
+  neon: {
+    color1: { r: 102, g: 237, b: 255 },
+    color2: { r: 0, g: 0, b: 0 },
+    color3: { r: 0, g: 255, b: 110 },
+    speed: 0.6,
+    scale: 2,
+    type: 'animated' as GradientType,
+    noise: 0.18,
+  },
+  plasma: {
+    color1: { r: 163, g: 106, b: 242 },
+    color2: { r: 0, g: 0, b: 0 },
+    color3: { r: 234, g: 130, b: 106 },
+    speed: 0.6,
+    scale: 1.2,
+    type: 'silk' as GradientType,
+    noise: 0.18,
+  },
+} as const

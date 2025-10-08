@@ -1,0 +1,37 @@
+# Source files
+src/app/
+src/components/demo/
+src/components/ui/
+src/components/code/
+src/components/content-demo.tsx
+src/components/feature-cards.tsx
+src/components/grad-flow-demo.tsx
+
+# Config files
+.next/
+.vercel/
+node_modules/
+.git/
+.gitignore
+.env*
+*.log
+
+# Development files
+tsconfig.json
+next.config.ts
+postcss.config.mjs
+tailwind.config.ts
+eslint.config.mjs
+tsup.config.ts
+
+# Documentation (keep README.md)
+docs/
+
+# Test files
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+
+# Development assets
+public/

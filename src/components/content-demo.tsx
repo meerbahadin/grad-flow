@@ -37,7 +37,7 @@ const ContentDemo = () => {
         </Link>
 
         <div className='flex gap-2'>
-          <Link target='_blank' href='https://github.com/meerbahadin/grad-flow'>
+          <Link target='_blank' href='https://github.com/meerbahadin/gradflow'>
             <Button
               size='icon'
               className='cursor-pointer dark text-foreground bg-background/30 hover:bg-background/50'

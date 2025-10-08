@@ -145,7 +145,38 @@
   * {
     @apply border-border outline-ring/50;
   }
-  body {
-    @apply bg-background text-foreground;
+}
+
+@layer components {
+  .card::before,
+  .card::after {
+    content: '';
+    @apply absolute inset-0 rounded-xl opacity-0 transition-opacity duration-500 pointer-events-none;
+  }
+
+  .card:hover::before {
+    @apply opacity-100;
+  }
+
+  .cards-container:hover > .card::after {
+    @apply opacity-100;
+  }
+
+  .card::before {
+    background: radial-gradient(
+      800px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+      rgba(var(--glow-color), 0.06),
+      transparent 40%
+    );
+    z-index: 3;
+  }
+
+  .card::after {
+    background: radial-gradient(
+      600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+      rgba(var(--glow-color), 0.4),
+      transparent 40%
+    );
+    z-index: 1;
   }
 }
